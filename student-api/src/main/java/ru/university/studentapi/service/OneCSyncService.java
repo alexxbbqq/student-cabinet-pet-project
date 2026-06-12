@@ -3,12 +3,13 @@ package ru.university.studentapi.service;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.university.studentapi.dto.DebtDto;
 import ru.university.studentapi.dto.GradeDto;
 import ru.university.studentapi.dto.LessonDto;
@@ -29,6 +30,7 @@ import ru.university.studentapi.repository.StudentRepository;
 @Service
 @ConditionalOnProperty(name = "app.integration.onec.sync-enabled", havingValue = "true", matchIfMissing = true)
 public class OneCSyncService {
+    private static final Logger log = LoggerFactory.getLogger(OneCSyncService.class);
     private static final String DEFAULT_DEMO_STUDENT_ID = "2021-301-047";
 
     private final OneCProperties properties;
@@ -54,7 +56,6 @@ public class OneCSyncService {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    @Transactional
     public void syncOnStartup() {
         syncDemoStudents();
     }
@@ -62,19 +63,25 @@ public class OneCSyncService {
     @Scheduled(
             initialDelayString = "${app.integration.onec.sync-fixed-delay-ms:600000}",
             fixedDelayString = "${app.integration.onec.sync-fixed-delay-ms:600000}")
-    @Transactional
     public void syncBySchedule() {
         syncDemoStudents();
     }
 
     public void syncDemoStudents() {
         for (String studentId : demoStudentIds()) {
-            syncStudent(studentId);
+            try {
+                syncStudent(studentId);
+            } catch (Exception ex) {
+                log.warn("1C sync failed for student {}: {}", studentId, ex.getMessage());
+            }
         }
     }
 
-    private void syncStudent(String studentId) {
+    public void syncStudent(String studentId) {
         StudentProfileDto profile = studentDataProvider.loadProfile(studentId);
+        if (profile == null) {
+            throw new IllegalStateException("1C returned no profile for student " + studentId);
+        }
         StudentEntity student = studentRepository.findByOnecId(studentId)
                 .orElseGet(() -> {
                     StudentEntity created = new StudentEntity();

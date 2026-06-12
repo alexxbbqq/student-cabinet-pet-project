@@ -225,9 +225,10 @@ button {
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100vh;
   display: grid;
   grid-template-columns: 248px 1fr;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -237,6 +238,8 @@ button {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .sidebar-header {
@@ -298,6 +301,8 @@ button {
 
 .workspace {
   min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .topbar {

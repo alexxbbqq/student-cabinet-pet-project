@@ -292,9 +292,10 @@ ONEC_SYNC_FIXED_DELAY_MS=600000
 
 ## Что можно доработать
 
-- связать JWT-пользователя с конкретным `app_users.student_onec_id`;
 - добавить журнал синхронизаций из 1С;
 - добавить integration tests;
 - добавить Swagger/OpenAPI;
 - добавить роли администратора и сотрудника деканата;
 - добавить refresh tokens.
+
+См. также [TODO.md](TODO.md) с техническими находками после code review.
