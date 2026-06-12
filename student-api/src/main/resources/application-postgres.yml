@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/student_cabinet}
+    username: ${DB_USERNAME:student_app}
+    password: ${DB_PASSWORD:student_app}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    hibernate:
+      ddl-auto: validate
+
+app:
+  integration:
+    onec:
+      mode: http
+      base-url: ${ONEC_BASE_URL:http://127.0.0.1:8091}
+      sync-enabled: ${ONEC_SYNC_ENABLED:true}
+      sync-fixed-delay-ms: ${ONEC_SYNC_FIXED_DELAY_MS:600000}
+      demo-student-ids:
+        - 2021-301-047
+        - 2021-301-048
+        - 2022-402-015
+        - 2020-104-033

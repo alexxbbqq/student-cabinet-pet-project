@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: student-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/student_cabinet}
+    username: ${DB_USERNAME:student_app}
+    password: ${DB_PASSWORD:student_app}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  flyway:
+    enabled: true
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000}
+  auth:
+    jwt-secret: ${JWT_SECRET:change-this-demo-secret-before-production}
+    token-ttl-minutes: ${JWT_TTL_MINUTES:120}
+  integration:
+    onec:
+      mode: mock
+      base-url: ""
+      username: ""
+      password: ""
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

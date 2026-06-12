@@ -1,0 +1,38 @@
+# Runtime logs
+*.log
+*.out.log
+*.err.log
+logs/
+
+# Local tooling downloaded for this workspace
+.tools/
+
+# Java / Maven
+target/
+*.class
+
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+
+# Environment files
+.env
+.env.*
+!.env.example
+*.local
+
+# IDE / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+TODO.md
+AGENTS.md

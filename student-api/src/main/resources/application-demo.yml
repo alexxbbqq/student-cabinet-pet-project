@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:student_cabinet;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: validate
+  h2:
+    console:
+      enabled: true
+
+app:
+  integration:
+    onec:
+      mode: http
+      base-url: http://127.0.0.1:8091
+      sync-enabled: true
+      sync-fixed-delay-ms: 600000
+      demo-student-ids:
+        - 2021-301-047
+        - 2021-301-048
+        - 2022-402-015
+        - 2020-104-033
