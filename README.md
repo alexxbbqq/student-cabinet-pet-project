@@ -207,6 +207,7 @@ POST /api/auth/login
 ```text
 GET /api/student/profile
 GET /api/student/grades
+GET /api/student/grades/history
 GET /api/student/schedule
 GET /api/student/debts
 ```
@@ -226,7 +227,8 @@ Flyway создает таблицы:
 - `schedule_days`;
 - `lessons`;
 - `debts`;
-- `app_users`.
+- `app_users`;
+- `grade_audit_log`.
 
 В demo-режиме используется H2 in-memory БД. Без demo-профиля бэкенд ожидает PostgreSQL:
 
@@ -294,6 +296,35 @@ http://localhost:8091/admin
 Там можно выбрать студента, добавить, изменить или удалить его оценки. Изменения сразу видны через `GET /onec/students/{id}/grades` и попадают в личный кабинет после очередной синхронизации (по умолчанию каждые `ONEC_SYNC_FIXED_DELAY_MS`) или после перезапуска `student-api`.
 
 Кнопка "Обновить" в личном кабинете не запускает синхронизацию с 1С — она просто перечитывает уже сохраненные в БД `student-api` данные.
+
+## Kafka: журнал изменений оценок
+
+Опциональная (по умолчанию выключена) часть проекта — событийный журнал изменений оценок на Kafka, демонстрирующий асинхронную обработку событий.
+
+Как это работает:
+
+```text
+OneCSyncService (при синхронизации сравнивает старые и новые оценки)
+  -> GradeEventPublisher (Kafka producer, топик grade-events)
+    -> GradeAuditConsumer (Kafka consumer)
+      -> таблица grade_audit_log
+        -> GET /api/student/grades/history
+```
+
+При каждой синхронизации `OneCSyncService` сравнивает значение и статус каждой оценки с предыдущей версией. Если оценка появилась впервые или изменилась (значение или статус), публикуется событие `GradeChangedEvent` в топик Kafka `grade-events`. `GradeAuditConsumer` читает эти события и сохраняет их в таблицу `grade_audit_log`. Студент может посмотреть историю изменений своих оценок через `GET /api/student/grades/history`.
+
+Включение:
+
+```bash
+docker compose up -d kafka
+```
+
+```bash
+KAFKA_ENABLED=true KAFKA_BOOTSTRAP_SERVERS=localhost:9092 \
+  mvn -Dspring-boot.run.profiles=postgres spring-boot:run
+```
+
+Если `app.kafka.enabled=false` (значение по умолчанию), используется no-op publisher: события не публикуются, consumer не запускается, и приложение не требует запущенного Kafka вообще — это касается demo-профиля с H2.
 
 ## Безопасность
 

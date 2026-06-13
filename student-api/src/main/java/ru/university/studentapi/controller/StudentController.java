@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.university.studentapi.dto.DebtDto;
 import ru.university.studentapi.dto.GradeDto;
+import ru.university.studentapi.dto.GradeHistoryEntryDto;
 import ru.university.studentapi.dto.ScheduleDayDto;
 import ru.university.studentapi.dto.StudentProfileDto;
 import ru.university.studentapi.service.StudentCabinetService;
@@ -27,6 +28,11 @@ public class StudentController {
     @GetMapping("/grades")
     public List<GradeDto> grades() {
         return service.getGrades();
+    }
+
+    @GetMapping("/grades/history")
+    public List<GradeHistoryEntryDto> gradeHistory() {
+        return service.getGradeHistory();
     }
 
     @GetMapping("/schedule")

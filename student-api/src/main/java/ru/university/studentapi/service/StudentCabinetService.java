@@ -11,14 +11,17 @@ import ru.university.studentapi.dto.GradeDto;
 import ru.university.studentapi.dto.LessonDto;
 import ru.university.studentapi.dto.ScheduleDayDto;
 import ru.university.studentapi.dto.StudentProfileDto;
+import ru.university.studentapi.dto.GradeHistoryEntryDto;
 import ru.university.studentapi.entity.AppUserEntity;
 import ru.university.studentapi.entity.DebtEntity;
+import ru.university.studentapi.entity.GradeAuditLogEntity;
 import ru.university.studentapi.entity.GradeEntity;
 import ru.university.studentapi.entity.LessonEntity;
 import ru.university.studentapi.entity.ScheduleDayEntity;
 import ru.university.studentapi.entity.StudentEntity;
 import ru.university.studentapi.repository.AppUserRepository;
 import ru.university.studentapi.repository.DebtRepository;
+import ru.university.studentapi.repository.GradeAuditLogRepository;
 import ru.university.studentapi.repository.GradeRepository;
 import ru.university.studentapi.repository.ScheduleDayRepository;
 import ru.university.studentapi.repository.StudentRepository;
@@ -30,18 +33,21 @@ public class StudentCabinetService {
     private final GradeRepository gradeRepository;
     private final ScheduleDayRepository scheduleDayRepository;
     private final DebtRepository debtRepository;
+    private final GradeAuditLogRepository gradeAuditLogRepository;
 
     public StudentCabinetService(
             AppUserRepository appUserRepository,
             StudentRepository studentRepository,
             GradeRepository gradeRepository,
             ScheduleDayRepository scheduleDayRepository,
-            DebtRepository debtRepository) {
+            DebtRepository debtRepository,
+            GradeAuditLogRepository gradeAuditLogRepository) {
         this.appUserRepository = appUserRepository;
         this.studentRepository = studentRepository;
         this.gradeRepository = gradeRepository;
         this.scheduleDayRepository = scheduleDayRepository;
         this.debtRepository = debtRepository;
+        this.gradeAuditLogRepository = gradeAuditLogRepository;
     }
 
     @Transactional(readOnly = true)
@@ -110,6 +116,22 @@ public class StudentCabinetService {
                     entity.getReason(),
                     entity.getRetakeDate(),
                     entity.getLocation()));
+        }
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<GradeHistoryEntryDto> getGradeHistory() {
+        StudentEntity student = getCurrentStudent();
+        List<GradeHistoryEntryDto> result = new ArrayList<>();
+        for (GradeAuditLogEntity entry : gradeAuditLogRepository.findByStudentOnecIdOrderByChangedAtDesc(student.getOnecId())) {
+            result.add(new GradeHistoryEntryDto(
+                    entry.getSubject(),
+                    entry.getOldValue(),
+                    entry.getNewValue(),
+                    entry.getOldStatus(),
+                    entry.getNewStatus(),
+                    entry.getChangedAt()));
         }
         return result;
     }
