@@ -106,21 +106,29 @@ function AppShell({ session, onLogout }) {
   const [page, setPage] = useState("grades");
   const [data, setData] = useState({ profile: null, grades: [], schedule: [], debts: [] });
   const [status, setStatus] = useState("loading");
+  const [refreshing, setRefreshing] = useState(false);
+
+  function loadData() {
+    return Promise.all([api.profile(session.token), api.grades(session.token), api.schedule(session.token), api.debts(session.token)])
+      .then(([profile, grades, schedule, debts]) => {
+        setData({ profile, grades, schedule, debts });
+        setStatus("ready");
+      })
+      .catch(() => setStatus("error"));
+  }
 
   useEffect(() => {
-    let active = true;
-    Promise.all([api.profile(session.token), api.grades(session.token), api.schedule(session.token), api.debts(session.token)])
-      .then(([profile, grades, schedule, debts]) => {
-        if (active) {
-          setData({ profile, grades, schedule, debts });
-          setStatus("ready");
-        }
-      })
-      .catch(() => active && setStatus("error"));
-    return () => {
-      active = false;
-    };
+    loadData();
   }, [session.token]);
+
+  async function refresh() {
+    setRefreshing(true);
+    try {
+      await loadData();
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   const pages = {
     grades: <GradesPage grades={data.grades} />,
@@ -170,7 +178,12 @@ function AppShell({ session, onLogout }) {
       <section className="workspace">
         <header className="topbar">
           <h1>{titles[page]}</h1>
-          <div className="sync-state">{status === "ready" ? "Данные обновлены" : "Подключение"}</div>
+          <div className="topbar-actions">
+            <button className="sync-button" onClick={refresh} disabled={refreshing}>
+              {refreshing ? "Обновление..." : "Обновить"}
+            </button>
+            <div className="sync-state">{status === "ready" ? "Данные обновлены" : "Подключение"}</div>
+          </div>
         </header>
 
         <main className="content">

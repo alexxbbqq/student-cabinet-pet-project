@@ -321,6 +321,28 @@ button {
   margin: 0;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sync-button {
+  border: 1px solid var(--brand);
+  background: #fff;
+  color: var(--brand);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sync-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .sync-state {
   padding: 6px 12px;
   border-radius: 999px;
