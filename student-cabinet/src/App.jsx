@@ -167,7 +167,7 @@ function AppShell({ session, onLogout }) {
           <button className={page === "grades" ? "active" : ""} onClick={() => setPage("grades")}>Оценки</button>
           <button className={page === "schedule" ? "active" : ""} onClick={() => setPage("schedule")}>Расписание</button>
           <button className={page === "debts" ? "active" : ""} onClick={() => setPage("debts")}>
-            Задолженности <span>{data.debts.length}</span>
+            Задолженности {data.debts.length > 0 && <span>{data.debts.length}</span>}
           </button>
           <button className={page === "profile" ? "active" : ""} onClick={() => setPage("profile")}>Профиль</button>
         </nav>
@@ -182,7 +182,7 @@ function AppShell({ session, onLogout }) {
             <button className="sync-button" onClick={refresh} disabled={refreshing}>
               {refreshing ? "Обновление..." : "Обновить"}
             </button>
-            <div className="sync-state">{status === "ready" ? "Данные обновлены" : "Подключение"}</div>
+            <div className="sync-state">{status === "ready" ? "Данные обновлены" : status === "error" ? "Ошибка подключения" : "Подключение"}</div>
           </div>
         </header>
 
