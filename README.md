@@ -336,9 +336,8 @@ KAFKA_ENABLED=true KAFKA_BOOTSTRAP_SERVERS=localhost:9092 \
 ## Что можно доработать
 
 - добавить журнал синхронизаций из 1С;
-- добавить integration tests;
 - добавить Swagger/OpenAPI;
 - добавить роли администратора и сотрудника деканата;
 - добавить refresh tokens.
 
-См. также [TODO.md](TODO.md) с техническими находками после code review.
+Технические находки и известные ограничения — в [TODO.md](TODO.md).
