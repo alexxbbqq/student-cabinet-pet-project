@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+app:
+  auth:
+    jwt-secret: test-secret-for-unit-tests-minimum-32-chars
+    token-ttl-minutes: 120
+  cors:
+    allowed-origins: http://localhost:5173
+  kafka:
+    enabled: false
+    grade-events-topic: grade-events
+  integration:
+    onec:
+      mode: mock
+      base-url: ""
+      username: ""
+      password: ""
+      sync-enabled: true
+      # Большая задержка — повторная синхронизация в тестах не нужна
+      sync-fixed-delay-ms: 3600000
+      demo-student-ids:
+        - 2021-301-047
