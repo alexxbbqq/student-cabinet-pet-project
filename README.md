@@ -338,6 +338,7 @@ KAFKA_ENABLED=true KAFKA_BOOTSTRAP_SERVERS=localhost:9092 \
 - добавить журнал синхронизаций из 1С;
 - добавить Swagger/OpenAPI;
 - добавить роли администратора и сотрудника деканата;
-- добавить refresh tokens.
+- добавить refresh tokens;
+- добавить уведомления об изменении оценок через Kafka → Telegram-бот и email.
 
 Технические находки и известные ограничения — в [TODO.md](TODO.md).
