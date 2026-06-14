@@ -17,6 +17,42 @@ services:
       timeout: 5s
       retries: 5
 
+  mock-1c:
+    build: ./mock-1c
+    container_name: student-cabinet-mock1c
+    restart: unless-stopped
+    ports:
+      - "8091:8091"
+
+  student-api:
+    build: ./student-api
+    container_name: student-cabinet-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mock-1c:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-student_cabinet}
+      DB_USERNAME: ${POSTGRES_USER:-student_app}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-student_app}
+      ONEC_BASE_URL: http://mock-1c:8091
+      ONEC_SYNC_ENABLED: "true"
+      CORS_ALLOWED_ORIGINS: http://localhost,http://localhost:80,http://localhost:5173
+
+  student-cabinet:
+    build: ./student-cabinet
+    container_name: student-cabinet-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - student-api
+
   kafka:
     image: apache/kafka:3.7.0
     container_name: student-cabinet-kafka

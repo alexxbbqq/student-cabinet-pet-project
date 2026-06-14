@@ -6,6 +6,16 @@
 
 ## Быстрый старт
 
+**Вариант 1 — Docker (рекомендуется):**
+
+```bash
+docker compose up --build
+```
+
+Поднимает весь стек одной командой. Приложение будет доступно на `http://localhost`.
+
+**Вариант 2 — локально (три отдельных терминала):**
+
 ```powershell
 .\start.ps1
 ```
@@ -91,66 +101,54 @@ React фронтенд
 
 Фронтенд не обращается к 1С напрямую. Он работает только с `student-api`. Бэкенд читает данные кабинета из своей БД, а БД обновляется синхронизацией из внешнего источника.
 
-## Локальный запуск
+## Запуск
 
-Требования:
+### Docker (рекомендуется)
 
-- JDK 8+;
-- Maven;
-- Node.js и npm.
-
-### Быстрый запуск с H2
-
-Запустить mock-1C:
+Требования: Docker Desktop.
 
 ```bash
-cd mock-1c
-node server.js
+docker compose up --build
 ```
 
-Запустить бэкенд с H2 demo-профилем:
+Поднимает сразу mock-1c, PostgreSQL, бэкенд и фронтенд. При первом запуске Flyway создаст таблицы и `OneCSyncService` загрузит демо-данные из mock-1C.
+
+| Сервис | Адрес |
+|---|---|
+| Приложение | http://localhost |
+| Backend API | http://localhost:8080 |
+| mock-1C admin | http://localhost:8091/admin |
+
+### Локально (три терминала)
+
+Требования: JDK 8+, Maven, Node.js и npm.
+
+**Быстрый старт — одна команда (Windows):**
+
+```powershell
+.\start.ps1
+```
+
+**Или вручную:**
 
 ```bash
-cd student-api
-mvn -Dspring-boot.run.profiles=demo spring-boot:run
+# Терминал 1
+cd mock-1c && node server.js
+
+# Терминал 2 — H2 demo (данные сбрасываются при перезапуске)
+cd student-api && mvn -Dspring-boot.run.profiles=demo spring-boot:run
+
+# Терминал 3
+cd student-cabinet && npm install && npm run dev
 ```
 
-Запустить Фронтенд:
+Приложение: `http://localhost:5173`
 
-```bash
-cd student-cabinet
-npm install
-npm run dev
-```
-
-Открыть приложение:
-
-```text
-http://localhost:5173
-```
-
-### Запуск с PostgreSQL
-
-Этот режим ближе к реальной интеграции: данные из mock-1C сохраняются в PostgreSQL и не пропадают после перезапуска бэкенда.
-
-Запустить PostgreSQL:
+**С PostgreSQL** (данные сохраняются между перезапусками):
 
 ```bash
 docker compose up -d postgres
-```
-
-Запустить mock-1C:
-
-```bash
-cd mock-1c
-node server.js
-```
-
-Запустить бэкенд с PostgreSQL-профилем:
-
-```bash
-cd student-api
-mvn -Dspring-boot.run.profiles=postgres spring-boot:run
+cd student-api && mvn -Dspring-boot.run.profiles=postgres spring-boot:run
 ```
 
 При первом запуске Flyway создаст таблицы, после чего `OneCSyncService` загрузит демо-студентов из mock-1C в PostgreSQL. Дальше API будет отдавать данные из PostgreSQL, а не ходить в mock-1C на каждый запрос фронтенда.
