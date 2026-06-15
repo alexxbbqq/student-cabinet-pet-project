@@ -23,6 +23,9 @@ async function request(path, options = {}, token) {
   };
 
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  if (response.status === 401) {
+    throw new Error("UNAUTHORIZED");
+  }
   if (!response.ok) {
     throw new Error(`API error ${response.status}`);
   }
@@ -114,7 +117,13 @@ function AppShell({ session, onLogout }) {
         setData({ profile, grades, schedule, debts });
         setStatus("ready");
       })
-      .catch(() => setStatus("error"));
+      .catch((err) => {
+        if (err.message === "UNAUTHORIZED") {
+          onLogout();
+        } else {
+          setStatus("error");
+        }
+      });
   }
 
   useEffect(() => {
