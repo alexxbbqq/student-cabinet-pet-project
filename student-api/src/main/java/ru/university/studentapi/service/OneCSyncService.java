@@ -3,8 +3,11 @@ package ru.university.studentapi.service;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,18 +134,26 @@ public class OneCSyncService {
     }
 
     private void replaceGrades(StudentEntity student, List<GradeDto> grades) {
-        Map<String, GradeEntity> previousByOnecId = new HashMap<>();
-        for (GradeEntity previous : gradeRepository.findByStudentOrderBySubjectAsc(student)) {
-            previousByOnecId.put(previous.getOnecId(), previous);
+        Map<String, GradeEntity> existingByOnecId = new HashMap<>();
+        for (GradeEntity g : gradeRepository.findByStudentOrderBySubjectAsc(student)) {
+            existingByOnecId.put(g.getOnecId(), g);
         }
 
-        gradeRepository.deleteByStudent(student);
-        gradeRepository.flush();
+        Set<String> incomingOnecIds = new HashSet<>();
         for (GradeDto dto : grades) {
-            GradeEntity entity = new GradeEntity();
-            entity.setId(stableId("grade", student.getOnecId(), dto.getId()));
-            entity.setStudent(student);
-            entity.setOnecId(dto.getId());
+            incomingOnecIds.add(dto.getId());
+            GradeEntity entity = existingByOnecId.get(dto.getId());
+            boolean isNew = entity == null;
+            if (isNew) {
+                entity = new GradeEntity();
+                entity.setId(stableId("grade", student.getOnecId(), dto.getId()));
+                entity.setStudent(student);
+                entity.setOnecId(dto.getId());
+            }
+
+            String oldGrade = entity.getGradeValue();
+            String oldStatus = entity.getStatus();
+
             entity.setSubject(dto.getSubject());
             entity.setTeacher(dto.getTeacher());
             entity.setType(dto.getType());
@@ -152,37 +163,51 @@ public class OneCSyncService {
             entity.setStatus(dto.getStatus());
             gradeRepository.save(entity);
 
-            GradeEntity previous = previousByOnecId.get(dto.getId());
-            boolean valueChanged = previous == null
+            boolean valueChanged = isNew
                     ? dto.getGrade() != null
-                    : !java.util.Objects.equals(previous.getGradeValue(), dto.getGrade())
-                            || !java.util.Objects.equals(previous.getStatus(), dto.getStatus());
+                    : !Objects.equals(oldGrade, dto.getGrade()) || !Objects.equals(oldStatus, dto.getStatus());
             if (valueChanged) {
                 gradeEventPublisher.publish(new GradeChangedEvent(
                         student.getOnecId(),
                         dto.getId(),
                         dto.getSubject(),
-                        previous == null ? null : previous.getGradeValue(),
+                        oldGrade,
                         dto.getGrade(),
-                        previous == null ? null : previous.getStatus(),
+                        oldStatus,
                         dto.getStatus(),
                         Instant.now()));
+            }
+        }
+
+        for (Map.Entry<String, GradeEntity> entry : existingByOnecId.entrySet()) {
+            if (!incomingOnecIds.contains(entry.getKey())) {
+                gradeRepository.delete(entry.getValue());
             }
         }
     }
 
     private void replaceSchedule(StudentEntity student, List<ScheduleDayDto> schedule) {
-        scheduleDayRepository.deleteByStudent(student);
-        scheduleDayRepository.flush();
+        Map<String, ScheduleDayEntity> existingByDayCode = new HashMap<>();
+        for (ScheduleDayEntity d : scheduleDayRepository.findByStudentOrderBySortOrderAsc(student)) {
+            existingByDayCode.put(d.getDayCode(), d);
+        }
+
+        Set<String> incomingDayCodes = new HashSet<>();
         for (int dayIndex = 0; dayIndex < schedule.size(); dayIndex++) {
             ScheduleDayDto dto = schedule.get(dayIndex);
-            ScheduleDayEntity day = new ScheduleDayEntity();
-            day.setId(stableId("schedule-day", student.getOnecId(), dto.getDay()));
-            day.setStudent(student);
-            day.setDayCode(dto.getDay());
+            incomingDayCodes.add(dto.getDay());
+
+            ScheduleDayEntity day = existingByDayCode.get(dto.getDay());
+            if (day == null) {
+                day = new ScheduleDayEntity();
+                day.setId(stableId("schedule-day", student.getOnecId(), dto.getDay()));
+                day.setStudent(student);
+                day.setDayCode(dto.getDay());
+            }
             day.setDayNumber(dto.getDate());
             day.setSortOrder(dayIndex);
 
+            day.getLessons().clear();
             List<LessonDto> lessons = dto.getLessons();
             for (int lessonIndex = 0; lessonIndex < lessons.size(); lessonIndex++) {
                 LessonDto lessonDto = lessons.get(lessonIndex);
@@ -197,22 +222,42 @@ public class OneCSyncService {
             }
             scheduleDayRepository.save(day);
         }
+
+        for (Map.Entry<String, ScheduleDayEntity> entry : existingByDayCode.entrySet()) {
+            if (!incomingDayCodes.contains(entry.getKey())) {
+                scheduleDayRepository.delete(entry.getValue());
+            }
+        }
     }
 
     private void replaceDebts(StudentEntity student, List<DebtDto> debts) {
-        debtRepository.deleteByStudent(student);
-        debtRepository.flush();
+        Map<String, DebtEntity> existingByOnecId = new HashMap<>();
+        for (DebtEntity d : debtRepository.findByStudentOrderBySubjectAsc(student)) {
+            existingByOnecId.put(d.getOnecId(), d);
+        }
+
+        Set<String> incomingOnecIds = new HashSet<>();
         for (DebtDto dto : debts) {
-            DebtEntity entity = new DebtEntity();
-            entity.setId(stableId("debt", student.getOnecId(), dto.getId()));
-            entity.setStudent(student);
-            entity.setOnecId(dto.getId());
+            incomingOnecIds.add(dto.getId());
+            DebtEntity entity = existingByOnecId.get(dto.getId());
+            if (entity == null) {
+                entity = new DebtEntity();
+                entity.setId(stableId("debt", student.getOnecId(), dto.getId()));
+                entity.setStudent(student);
+                entity.setOnecId(dto.getId());
+            }
             entity.setSubject(dto.getSubject());
             entity.setTeacher(dto.getTeacher());
             entity.setReason(dto.getReason());
             entity.setRetakeDate(dto.getRetakeDate());
             entity.setLocation(dto.getLocation());
             debtRepository.save(entity);
+        }
+
+        for (Map.Entry<String, DebtEntity> entry : existingByOnecId.entrySet()) {
+            if (!incomingOnecIds.contains(entry.getKey())) {
+                debtRepository.delete(entry.getValue());
+            }
         }
     }
 
