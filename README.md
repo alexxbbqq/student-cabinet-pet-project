@@ -44,7 +44,7 @@ docker compose up --build
 
 Бэкенд:
 
-- Java 8+
+- Java 17
 - Spring Boot 2.7
 - Spring Security
 - Spring Data JPA
@@ -121,7 +121,7 @@ docker compose up --build
 
 ### Локально (три терминала)
 
-Требования: JDK 8+, Maven, Node.js и npm.
+Требования: JDK 17+, Maven, Node.js и npm.
 
 **Быстрый старт — одна команда (Windows):**
 
