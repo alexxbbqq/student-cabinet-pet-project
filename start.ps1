@@ -4,7 +4,7 @@ $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$root\mock-1c'; node server.js" -WindowStyle Normal
 Start-Sleep -Seconds 2
 
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$root\student-api'; mvn '-Dspring.profiles.active=demo' spring-boot:run" -WindowStyle Normal
+Start-Process cmd -ArgumentList "/k", "cd /d `"$root\student-api`" && mvn -Dspring-boot.run.profiles=demo spring-boot:run" -WindowStyle Normal
 Start-Sleep -Seconds 2
 
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$root\student-cabinet'; npm install; npm run dev" -WindowStyle Normal

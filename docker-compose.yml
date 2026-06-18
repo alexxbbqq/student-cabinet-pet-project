@@ -42,6 +42,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-student_app}
       ONEC_BASE_URL: http://mock-1c:8091
       ONEC_SYNC_ENABLED: "true"
+      ONEC_SYNC_INITIAL_DELAY_MS: 5000
       CORS_ALLOWED_ORIGINS: http://localhost,http://localhost:80,http://localhost:5173
 
   student-cabinet:

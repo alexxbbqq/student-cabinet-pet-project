@@ -18,7 +18,8 @@ app:
       mode: http
       base-url: http://127.0.0.1:8091
       sync-enabled: true
-      sync-fixed-delay-ms: 600000
+      sync-fixed-delay-ms: 10000
+      sync-initial-delay-ms: 5000
       demo-student-ids:
         - 2021-301-047
         - 2021-301-048

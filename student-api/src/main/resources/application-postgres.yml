@@ -16,6 +16,7 @@ app:
       base-url: ${ONEC_BASE_URL:http://127.0.0.1:8091}
       sync-enabled: ${ONEC_SYNC_ENABLED:true}
       sync-fixed-delay-ms: ${ONEC_SYNC_FIXED_DELAY_MS:600000}
+      sync-initial-delay-ms: ${ONEC_SYNC_INITIAL_DELAY_MS:600000}
       demo-student-ids:
         - 2021-301-047
         - 2021-301-048

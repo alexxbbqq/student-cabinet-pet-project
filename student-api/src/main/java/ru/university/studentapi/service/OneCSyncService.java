@@ -74,7 +74,7 @@ public class OneCSyncService {
     }
 
     @Scheduled(
-            initialDelayString = "${app.integration.onec.sync-fixed-delay-ms:600000}",
+            initialDelayString = "${app.integration.onec.sync-initial-delay-ms:600000}",
             fixedDelayString = "${app.integration.onec.sync-fixed-delay-ms:600000}")
     @Transactional
     public void syncBySchedule() {

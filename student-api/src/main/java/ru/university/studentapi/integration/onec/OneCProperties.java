@@ -14,6 +14,7 @@ public class OneCProperties {
     private String password;
     private boolean syncEnabled = true;
     private long syncFixedDelayMs = 600000L;
+    private long syncInitialDelayMs = 600000L;
     private List<String> demoStudentIds = new ArrayList<>();
 
     public String getMode() { return mode; }
@@ -28,6 +29,8 @@ public class OneCProperties {
     public void setSyncEnabled(boolean syncEnabled) { this.syncEnabled = syncEnabled; }
     public long getSyncFixedDelayMs() { return syncFixedDelayMs; }
     public void setSyncFixedDelayMs(long syncFixedDelayMs) { this.syncFixedDelayMs = syncFixedDelayMs; }
+    public long getSyncInitialDelayMs() { return syncInitialDelayMs; }
+    public void setSyncInitialDelayMs(long syncInitialDelayMs) { this.syncInitialDelayMs = syncInitialDelayMs; }
     public List<String> getDemoStudentIds() { return demoStudentIds; }
     public void setDemoStudentIds(List<String> demoStudentIds) { this.demoStudentIds = demoStudentIds; }
 }
